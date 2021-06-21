@@ -13,6 +13,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.function.Tuple2
 import reactor.util.function.Tuple3
+import java.time.ZonedDateTime
 
 @Service
 class Processor(
@@ -90,10 +91,11 @@ class Processor(
         return getExercise(exerciseId)
             .flatMap{ Mono.zip(
                 Mono.just(it.workoutId),
-                exercisesRepo.deleteById(it.id),
-                setsRepo.deleteByExerciseId(it.id)
+                exercisesRepo.deleteById(it.id).thenReturn(""),
+                setsRepo.deleteByExerciseId(it.id).thenReturn("")
             )}
             .flatMap{ (workoutId, _, _) -> getWorkout(workoutId) }
+            .switchIfEmpty(Mono.just(FitnessWorkout()))
     }
 
     fun deleteSet(setId: String): Mono<FitnessExercise> {
@@ -103,6 +105,26 @@ class Processor(
                 setsRepo.deleteById(setId).thenReturn("")
             )}
             .flatMap{ (exerciseId, _) -> getExercise(exerciseId) }
+    }
+
+    fun findRecentActivityAfter(
+        timestamp: ZonedDateTime = ZonedDateTime.now().minusDays(5)
+    ): Flux<FitnessWorkout> {
+        return Flux.merge(
+            workoutsRepo.findByTimestampAfter(timestamp),
+            exercisesRepo.findByTimestampAfter(timestamp)
+                .map{it.workoutId}
+                .distinct()
+                .flatMap(workoutsRepo::findById),
+            setsRepo.findByTimestampAfter(timestamp)
+                .map{it.exerciseId}
+                .distinct()
+                .flatMap(exercisesRepo::findById)
+                .map{it.workoutId}
+                .distinct()
+                .flatMap(workoutsRepo::findById)
+        )
+            .distinct()
     }
 
     private fun getExercisesForWorkout(workoutId: String): Mono<List<FitnessExercise>> {

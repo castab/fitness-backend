@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.ExceptionHandler
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.util.UUID
+import java.util.*
 
 @RestController
 @CrossOrigin(origins = ["http://localhost:3000", "http://ultra6mobile:3000"], maxAge = 3600)
@@ -22,6 +22,9 @@ class Api (
 ) {
     private val uuidPattern =
         Regex("\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b")
+
+    @GetMapping("/workouts")
+    fun getWorkouts() = processor.findRecentActivityAfter().take(6)
 
     @GetMapping("/measure")
     fun getMeasuring(): Map<String, List<String>> {

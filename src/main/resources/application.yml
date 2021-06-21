@@ -10,4 +10,4 @@ spring:
       password: mongopassword
       database: fitness_log
       port: 27017
-      host: mongodb.minneapolis
+      host: mongodb
