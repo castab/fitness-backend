@@ -24,7 +24,15 @@ class Api (
         Regex("\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b")
 
     @GetMapping("/workouts")
-    fun getWorkouts() = processor.findRecentActivityAfter().take(6)
+    fun getWorkouts(@RequestParam maxCount: Int?): Mono<List<FitnessWorkout>> {
+        val count = when {
+            maxCount == null -> 6
+            maxCount > 20 -> throw BadRequestException("Request too large")
+            maxCount <= 0 -> throw BadRequestException("Request invalid")
+            else -> maxCount
+        }
+        return processor.findRecentActivityAfter(count = count)
+    }
 
     @GetMapping("/measure")
     fun getMeasuring(): Map<String, List<String>> {
