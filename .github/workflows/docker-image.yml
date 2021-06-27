@@ -10,9 +10,9 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: openjdk:16-oracle
 
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag castab/fitness-backend:$(date +%s)
+      run: ./gradlew bootBuildImage
