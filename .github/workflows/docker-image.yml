@@ -28,4 +28,4 @@ jobs:
     - name: Build the Docker Image using Buildpacks
       run: ./gradlew bootBuildImage
     - name: Retag Docker image
-      run: docker image tag docker.io/library/fitness-backedn:0.0.1-SNAPSHOT casta/fitness-backend:b${GITHUB_RUN_ID}-${GITHUB_SHA::8}
+      run: docker image tag docker.io/library/fitness-backend:0.0.1-SNAPSHOT casta/fitness-backend:b${GITHUB_RUN_ID}-${GITHUB_SHA::8}
