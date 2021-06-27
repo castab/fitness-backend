@@ -35,4 +35,3 @@ jobs:
 
     - name: Build Docker image
       run: docker build . -t ${GITHUB_REPOSITORY}:b${GITUB_RUN_NUMBER}-${GITHUB_COMMIT_SHA::8}
-    0..0
