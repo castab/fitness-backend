@@ -175,6 +175,4 @@ class Processor(
 
     private fun <T: Any> Mono<T>.throwResourceNotFoundIfEmpty(msg: String) =
         switchIfEmpty(Mono.error(ResourceNotFoundException(msg)))
-    private fun <T: Any> Flux<T>.throwResourceNotFoundIfEmpty(msg: String) =
-        switchIfEmpty(Mono.error(ResourceNotFoundException(msg)))
 }
