@@ -25,13 +25,13 @@ class Api (
 
     @GetMapping("/workouts")
     fun getWorkouts(@RequestParam maxCount: Int?): Mono<List<FitnessWorkout>> {
-        val count = when {
+        return when {
             maxCount == null -> 6
-            maxCount > 20 -> throw BadRequestException("Request too large")
-            maxCount <= 0 -> throw BadRequestException("Request invalid")
+            maxCount > 20 -> throw BadRequestException("Request too large: $maxCount")
+            maxCount <= 0 -> throw BadRequestException("Request invalid: $maxCount")
             else -> maxCount
         }
-        return processor.findRecentActivityAfter(count = count)
+            .let{processor.findRecentActivityAfter(count = it)}
     }
 
     @GetMapping("/measure")
@@ -91,6 +91,12 @@ class Api (
     ): Mono<FitnessExercise> {
         return exerciseId.checkValidity()
             .flatMap{processor.changeExerciseMeasure(it, newMeasure)}
+    }
+
+    @DeleteMapping("/workout/{workoutId}")
+    fun deleteWorkout(@PathVariable workoutId: String): Mono<String> {
+        return workoutId.checkValidity()
+            .flatMap(processor::deleteWorkout)
     }
 
     @DeleteMapping("/exercise/{exerciseId}")

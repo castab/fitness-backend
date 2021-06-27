@@ -1,5 +1,6 @@
 package com.supernet.fitnesstracker.processor
 
+import com.supernet.fitnesstracker.api.ResourceNotFoundException
 import com.supernet.fitnesstracker.model.FitnessExercise
 import com.supernet.fitnesstracker.model.FitnessMeasure
 import com.supernet.fitnesstracker.model.FitnessSet
@@ -24,12 +25,16 @@ class Processor(
     private val log = KotlinLogging.logger{}
 
     fun getWorkout(workoutId: String): Mono<FitnessWorkout> {
-        return Mono.zip(workoutsRepo.findById(workoutId), getExercisesForWorkout(workoutId))
-            .map{ (workout, exercises) -> workout.copy(exercises = exercises)}
+        return workoutsRepo.findById(workoutId)
+            .throwResourceNotFoundIfEmpty("Workout not found")
+            .flatMap{ Mono.zip( Mono.just(it), getExercisesForWorkout(it.id)) }
+            .map{ (workout, exercises) -> workout.copy(exercises = exercises) }
     }
 
     fun getExercise(exerciseId: String): Mono<FitnessExercise> {
-        return Mono.zip(exercisesRepo.findById(exerciseId), getSetsForExercise(exerciseId))
+        return exercisesRepo.findById(exerciseId)
+            .throwResourceNotFoundIfEmpty("Exercise not found")
+            .flatMap{ Mono.zip(Mono.just(it), getSetsForExercise(it.id)) }
             .map{ (exercise, sets) -> exercise.copy(sets = sets) }
     }
 
@@ -44,7 +49,9 @@ class Processor(
     }
 
     fun addExerciseToWorkout(workoutId: String, exerciseToAdd: FitnessExercise): Mono<FitnessWorkout> {
-        return getExercisesForWorkout(workoutId)
+        return workoutsRepo.findById(workoutId)
+            .throwResourceNotFoundIfEmpty("Workout not found")
+            .flatMap{ getExercisesForWorkout(workoutId) }
             .map{ list ->
                 if (list.isEmpty()) return@map -1
                 list.map{it.order}.maxByOrNull{it} ?: -1
@@ -61,7 +68,8 @@ class Processor(
     }
 
     fun addSetToExercise(exerciseId: String, setToAdd: FitnessSet): Mono<FitnessExercise> {
-        return setsRepo.findByExerciseId(exerciseId)
+        return exercisesRepo.findById(exerciseId)
+            .flatMapMany{ setsRepo.findByExerciseId(exerciseId) }
             .collectList()
             .map{ list ->
                 if (list.isEmpty()) return@map -1
@@ -81,14 +89,25 @@ class Processor(
 
     fun changeExerciseMeasure(exerciseId: String, newMeasure: FitnessMeasure): Mono<FitnessExercise> {
         return exercisesRepo.findById(exerciseId)
+            .throwResourceNotFoundIfEmpty("Exercise not found")
             .map{ it.copy(measure = newMeasure) }
             .flatMap(exercisesRepo::save)
             .zipWith(getSetsForExercise(exerciseId))
             .map{ (exercise, sets) -> exercise.copy(sets = sets) }
     }
 
+    fun deleteWorkout(workoutId: String): Mono<String> {
+        return getWorkout(workoutId)
+            .throwResourceNotFoundIfEmpty("Workout not found")
+            .flatMapIterable{ it.exercises }
+            .flatMap{ deleteExercise(it.id) }
+            .collectList()
+            .flatMap{ workoutsRepo.deleteById(workoutId).thenReturn("{}") }
+    }
+
     fun deleteExercise(exerciseId: String): Mono<FitnessWorkout> {
         return getExercise(exerciseId)
+            .throwResourceNotFoundIfEmpty("Exercise not found")
             .flatMap{ Mono.zip(
                 Mono.just(it.workoutId),
                 exercisesRepo.deleteById(it.id).thenReturn(""),
@@ -100,6 +119,7 @@ class Processor(
 
     fun deleteSet(setId: String): Mono<FitnessExercise> {
         return setsRepo.findById(setId)
+            .throwResourceNotFoundIfEmpty(("Set not found"))
             .flatMap{ Mono.zip(
                 Mono.just(it.exerciseId),
                 setsRepo.deleteById(setId).thenReturn("")
@@ -132,6 +152,9 @@ class Processor(
             .map{it.take(count)}
     }
 
+    private fun checkIfWorkoutExists(workoutId: String) = workoutsRepo.existsById(workoutId)
+    private fun checkIfExerciseExists(exerciseId: String) = exercisesRepo.existsById(exerciseId)
+
     private fun getExercisesForWorkout(workoutId: String): Mono<List<FitnessExercise>> {
         return exercisesRepo.findByWorkoutId(workoutId)
             .flatMap{ Mono.zip(Mono.just(it), getSetsForExercise(it.id)) }
@@ -149,4 +172,9 @@ class Processor(
     private operator fun <T: Any, U: Any> Tuple2<T, U>.component1() = t1
     private operator fun <T: Any, U: Any> Tuple2<T, U>.component2() = t2
     private operator fun <T: Any, U: Any, V: Any> Tuple3<T, U, V>.component3() = t3
+
+    private fun <T: Any> Mono<T>.throwResourceNotFoundIfEmpty(msg: String) =
+        switchIfEmpty(Mono.error(ResourceNotFoundException(msg)))
+    private fun <T: Any> Flux<T>.throwResourceNotFoundIfEmpty(msg: String) =
+        switchIfEmpty(Mono.error(ResourceNotFoundException(msg)))
 }
