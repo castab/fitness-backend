@@ -5,4 +5,4 @@ server:
     min-response-size: 256
 
 spring.data.mongodb:
-  uri: mongodb://fitness_service:fitness_password@localhost/fitness_log?authSource=fitness_log
+  uri: ${MONGO_URI}
