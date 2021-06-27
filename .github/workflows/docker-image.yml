@@ -30,4 +30,4 @@ jobs:
 #     - name: Retag Docker image
 #       run: docker image tag docker.io/library/fitness-backend:0.0.1-SNAPSHOT castab/fitness-backend:b${{env.GITHUB_RUN_ID}}-${{env.GITHUB_SHA}}
     - name: Test ENV variables
-      run: echo ${GITHUB_RUN_ID} && echo ${GITHUB_RUN_NUMBER} && echo ${GITHUB_JOB} && echo ${GITHUB_REPOSITORY}
+      run: echo ${GITHUB_RUN_ID} && echo ${GITHUB_RUN_NUMBER} && echo ${GITHUB_JOB} && echo ${GITHUB_REPOSITORY} && echo ${GITHUB_SHA} && echo ${GITHUB_SHA::8}
