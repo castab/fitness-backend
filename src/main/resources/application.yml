@@ -3,11 +3,6 @@ server:
   compression:
     enabled: true
     min-response-size: 256
-spring:
-  data:
-    mongodb:
-      username: mongoadmin
-      password: mongopassword
-      database: fitness_log
-      port: 27017
-      host: mongodb
+
+spring.data.mongodb:
+  uri: mongodb://fitness_service:fitness_password@localhost/fitness_log?authSource=fitness_log
