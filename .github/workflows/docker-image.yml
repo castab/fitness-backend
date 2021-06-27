@@ -31,8 +31,8 @@ jobs:
       run: ./gradlew bootBuildImage
     - name: Retag Docker image
       env:
-        IMAGE_NAME: ${{GITHUB_REPOSITORY}}
-        BUILD_NUMBER: ${{GITHUB_RUN_NUMBER}}
-        COMMIT_SHA: ${{GITHUB_COMMIT_SHA}}::8
+        IMAGE_NAME: ${{env.GITHUB_REPOSITORY}}
+        BUILD_NUMBER: ${{env.GITHUB_RUN_NUMBER}}
+        COMMIT_SHA: ${{env.GITHUB_COMMIT_SHA}}::8
       run: docker image tag docker.io/library/fitness-backend:0.0.1-SNAPSHOT ${IMAGE_NAME}:b${BUILD_NUMBER}
     
