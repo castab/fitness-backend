@@ -34,5 +34,5 @@ jobs:
         IMAGE_NAME: ${{env.GITHUB_REPOSITORY}}
         BUILD_NUMBER: ${{env.GITHUB_RUN_NUMBER}}
         COMMIT_SHA: ${{env.GITHUB_COMMIT_SHA}}::8
-      run: docker image tag docker.io/library/fitness-backend:0.0.1-SNAPSHOT ${IMAGE_NAME}:b${BUILD_NUMBER}
+      run: docker image tag docker.io/library/fitness-backend:0.0.1-SNAPSHOT ${{IMAGE_NAME}}:b${{BUILD_NUMBER}}
     
