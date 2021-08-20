@@ -128,7 +128,7 @@ class Processor(
     }
 
     fun findRecentActivityAfter(
-        timestamp: ZonedDateTime = ZonedDateTime.now().minusDays(5),
+        timestamp: ZonedDateTime = ZonedDateTime.now().minusDays(7),
         count: Int = 6
     ): Mono<List<FitnessWorkout>> {
         return Flux.merge(
