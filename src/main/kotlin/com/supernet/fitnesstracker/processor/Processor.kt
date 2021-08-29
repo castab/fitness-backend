@@ -128,8 +128,8 @@ class Processor(
     }
 
     fun findRecentActivityAfter(
-        timestamp: ZonedDateTime = ZonedDateTime.now().minusDays(7),
-        count: Int = 6
+        timestamp: ZonedDateTime = ZonedDateTime.now().minusDays(30),
+        count: Int = 9
     ): Mono<List<FitnessWorkout>> {
         return Flux.merge(
             workoutsRepo.findByTimestampAfter(timestamp),
@@ -146,7 +146,7 @@ class Processor(
                 .flatMap(workoutsRepo::findById)
         )
             .distinct()
-            .flatMap{getWorkout(it.id)}
+            // .flatMap{getWorkout(it.id)} // TODO: Figure out how to get this pre-loaded in UI
             .collectList()
             .map{recents -> recents.sortedByDescending { it.timestamp }}
             .map{it.take(count)}
