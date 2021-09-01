@@ -24,14 +24,14 @@ class Api (
         Regex("\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b")
 
     @GetMapping("/workouts")
-    fun getWorkouts(@RequestParam maxCount: Int?): Mono<List<FitnessWorkout>> {
-        return when {
-            maxCount == null -> 6
-            maxCount > 20 -> throw BadRequestException("Request too large: $maxCount")
-            maxCount <= 0 -> throw BadRequestException("Request invalid: $maxCount")
-            else -> maxCount
+    fun getWorkouts(@RequestParam take: Long?): Flux<FitnessWorkout> {
+        val maxResults = when {
+            take == null -> 9
+            take > 20 -> throw BadRequestException("Request too large: $take")
+            take <= 0 -> throw BadRequestException("Request invalid: $take")
+            else -> take
         }
-            .let{processor.findRecentActivityAfter(count = it)}
+        return processor.getRecentActivity().take(maxResults)
     }
 
     @GetMapping("/measure")

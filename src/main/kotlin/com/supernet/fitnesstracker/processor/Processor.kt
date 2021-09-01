@@ -127,29 +127,24 @@ class Processor(
             .flatMap{ (exerciseId, _) -> getExercise(exerciseId) }
     }
 
-    fun findRecentActivityAfter(
-        timestamp: ZonedDateTime = ZonedDateTime.now().minusDays(30),
-        count: Int = 9
-    ): Mono<List<FitnessWorkout>> {
+    fun getRecentActivity(
+        days: Long = 60
+    ): Flux<FitnessWorkout> {
+        val timestamp = ZonedDateTime.now().minusDays(days)
         return Flux.merge(
             workoutsRepo.findByTimestampAfter(timestamp),
             exercisesRepo.findByTimestampAfter(timestamp)
                 .map{it.workoutId}
-                .distinct()
                 .flatMap(workoutsRepo::findById),
             setsRepo.findByTimestampAfter(timestamp)
                 .map{it.exerciseId}
-                .distinct()
                 .flatMap(exercisesRepo::findById)
                 .map{it.workoutId}
-                .distinct()
                 .flatMap(workoutsRepo::findById)
         )
             .distinct()
+            .sort()
             // .flatMap{getWorkout(it.id)} // TODO: Figure out how to get this pre-loaded in UI
-            .collectList()
-            .map{recents -> recents.sortedByDescending { it.timestamp }}
-            .map{it.take(count)}
     }
 
     private fun checkIfWorkoutExists(workoutId: String) = workoutsRepo.existsById(workoutId)
