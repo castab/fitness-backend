@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 import java.util.*
 
 @RestController
-@CrossOrigin(origins = ["http://localhost:3000", "http://ultra6mobile:3000"], maxAge = 3600)
+@CrossOrigin(origins = ["http://ui.fitness"], maxAge = 3600)
 class Api (
     private val processor: Processor
 ) {
