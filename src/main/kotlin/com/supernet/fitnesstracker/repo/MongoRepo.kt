@@ -22,9 +22,9 @@ interface WorkoutsRepo : ReactiveMongoRepository<FitnessWorkout, String> {
 interface ExercisesRepo : ReactiveMongoRepository<FitnessExercise, String> {
     fun findByWorkoutId(workoutId: String): Flux<FitnessExercise>
     fun findByTimestampAfter(timestamp: ZonedDateTime): Flux<FitnessExercise>
-    @Query(value = "{workoutId: ?0 }", fields = "{ _id : 1}")
+    @Query(value = "{ workoutId: ?0 }", fields = "{ _id : 1 }")
     fun findExerciseIdsForWorkoutId(workoutId: String): Flux<GenericDocumentId>
-
+    fun findByNameRegexAndTimestampAfter(regexName: String, timestamp: ZonedDateTime): Flux<FitnessExercise>
 }
 
 @Service

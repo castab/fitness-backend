@@ -51,6 +51,11 @@ class Api (
             .flatMap(processor::getExercise)
     }
 
+    @GetMapping("/exercise/pr")
+    fun getExercisePr(@RequestParam name: String): Mono<FitnessExercise> {
+        return processor.getExercisePr(name)
+    }
+
     @GetMapping("/workout/{workoutId}")
     fun getWorkout(@PathVariable workoutId: String): Mono<FitnessWorkout> {
         return workoutId.checkValidity()

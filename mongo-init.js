@@ -12,6 +12,9 @@ db.workouts.createIndex(
 db.exercises.createIndex(
     { "timestamp": 1 }
 )
+db.exercises.createIndex(
+    { "name": 1, "timestamp": 1 }
+)
 db.sets.createIndex(
     { "timestamp": 1 }
 )

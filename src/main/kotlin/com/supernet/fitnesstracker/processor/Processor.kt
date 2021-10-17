@@ -38,6 +38,23 @@ class Processor(
             .map{ (exercise, sets) -> exercise.copy(sets = sets) }
     }
 
+    fun getExercisePr(name: String): Mono<FitnessExercise> {
+        return exercisesRepo.findByNameRegexAndTimestampAfter("(?i)$name", ZonedDateTime.now().minusDays(60))
+            .flatMap{ getExercise(it.id) }
+            .flatMapIterable(FitnessExercise::sets)
+            .collectList()
+            .flatMap{ allSets ->
+                if (allSets.isEmpty()) return@flatMap Mono.error(
+                    ResourceNotFoundException("Unable to calculate PR for $name")
+                )
+                val maxRep = allSets.maxByOrNull(FitnessSet::of)
+                return@flatMap if (maxRep == null) Mono.empty()
+                else Mono.just(maxRep.exerciseId)
+            }
+            .throwResourceNotFoundIfEmpty( "Unable to calculate PR for $name ")
+            .flatMap(::getExercise)
+    }
+
     fun getExercisesByWorkoutId(workoutId: String): Flux<FitnessExercise> {
         return exercisesRepo.findByWorkoutId(workoutId)
             .flatMap{Mono.zip(Mono.just(it), getSetsForExercise(it.id))}
