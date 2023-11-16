@@ -8,7 +8,7 @@ import com.supernet.fitnesstracker.model.FitnessWorkout
 import com.supernet.fitnesstracker.repo.ExercisesRepo
 import com.supernet.fitnesstracker.repo.SetsRepo
 import com.supernet.fitnesstracker.repo.WorkoutsRepo
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

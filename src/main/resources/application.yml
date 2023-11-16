@@ -6,3 +6,5 @@ server:
 
 spring.data.mongodb:
   uri: ${MONGO_URI}
+
+MONGO_URI: mongodb://fitness_service:fitness_password@localhost:27017/fitness_log?authSource=fitness_log
