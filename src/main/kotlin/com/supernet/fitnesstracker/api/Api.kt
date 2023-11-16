@@ -138,10 +138,10 @@ class ExceptionHandler {
     @ResponseBody
     fun handleResourceNotFoundException(e: ResourceNotFoundException) = ErrorResponse("${e.message}")
 
-    @ExceptionHandler(HttpMessageConversionException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    fun handleConversionException(e: HttpMessageConversionException) = ErrorResponse("There was a problem reading the JSON that was provided: ${e.cause}")
+//    @ExceptionHandler(HttpMessageConversionException::class)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ResponseBody
+//    fun handleConversionException(e: HttpMessageConversionException) = ErrorResponse("There was a problem reading the JSON that was provided: ${e.cause}")
 }
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
